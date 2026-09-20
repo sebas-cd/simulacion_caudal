@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación Interactiva: Caudal e Integral Definida</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #2563eb;
+            --accent-color: #3b82f6;
+            --light-bg: #f8fafc;
+            --border-color: #cbd5e1;
+            --text-dark: #0f172a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .header-info {
+            background-color: #e0f2fe;
+            border-left: 5px solid var(--secondary-color);
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 850px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            padding: 18px;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        input[type="number"] {
+            width: 90%;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-color);
+        }
+
+        canvas {
+            width: 100%;
+            height: 350px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .calc-box {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13.5px;
+            line-height: 1.5;
+        }
+
+        .calc-box span.highlight {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .calc-box span.result {
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .verification-card {
+            margin-top: 25px;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-left: 5px solid #16a34a;
+            padding: 15px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Simulación Interactiva: Caudal e Integral Definida</h1>
+    
+    <div class="grid-layout">
+        <!-- Panel Izquierdo: Configuración e Insumos -->
+        <div class="card">
+            <h2>Datos de Entrada</h2>
+            <p>Modifica los valores para actualizar la gráfica y la integral automáticamente:</p>
+            
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Tiempo t (horas)</th>
+                        <th>Caudal Q (m³/s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="number" step="any" value="0" onchange="updateSimulation()"></td>
+                        <td><input type="number" step="any" value="1116.19" onchange="updateSimulation()"></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><input type="number" step="any" value="6" onchange="updateSimulation()"></td>
+                        <td><input type="number" step="any" value="1166.11" onchange="updateSimulation()"></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><input type="number" step="any" value="12" onchange="updateSimulation()"></td>
+                        <td><input type="number" step="any" value="1148.48" onchange="updateSimulation()"></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><input type="number" step="any" value="24" onchange="updateSimulation()"></td>
+                        <td><input type="number" step="any" value="1004.23" onchange="updateSimulation()"></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><input type="number" step="any" value="30" onchange="updateSimulation()"></td>
+                        <td><input type="number" step="any" value="992.13" onchange="updateSimulation()"></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><input type="number" step="any" value="36" onchange="updateSimulation()"></td>
+                        <td><input type="number" step="any" value="982.33" onchange="updateSimulation()"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="controls">
+                <label for="intervalSelect">Seleccionar Intervalo a Integrar:</label>
+                <select id="intervalSelect" onchange="updateSimulation()">
+                    <option value="first">Primer Intervalo (t₀ a t₁)</option>
+                    <option value="full">Intervalo Completo (t₀ a t₅)</option>
+                </select>
+
+                <button onclick="resetData()">Restablecer Datos Originales</button>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Gráfica -->
+        <div class="card">
+            <h2>Gráfica del Caudal Q(t)</h2>
+            <canvas id="graphCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Panel Inferior: Procedimiento Matemático detallado -->
+    <div class="card" style="margin-top: 25px;">
+        <h2>Procedimiento del Cálculo e Integral Definida</h2>
+        <div id="mathOutput" class="calc-box"></div>
+    </div>
+</div>
+
+<script>
+const defaultData = [
+    { t: 0, q: 1116.19 },
+    { t: 6, q: 1166.11 },
+    { t: 12, q: 1148.48 },
+    { t: 24, q: 1004.23 },
+    { t: 30, q: 992.13 },
+    { t: 36, q: 982.33 }
+];
+
+function resetData() {
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    defaultData.forEach((point, index) => {
+        const inputs = rows[index].querySelectorAll("input");
+        inputs[0].value = point.t;
+        inputs[1].value = point.q;
+    });
+    updateSimulation();
+}
+
+function getData() {
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    const data = [];
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll("input");
+        data.push({
+            t: parseFloat(inputs[0].value) || 0,
+            q: parseFloat(inputs[1].value) || 0
+        });
+    });
+    return data;
+}
+
+function updateSimulation() {
+    const data = getData();
+    const mode = document.getElementById("intervalSelect").value;
+    
+    drawGraph(data, mode);
+    calculateIntegral(data, mode);
+}
+
+function drawGraph(data, mode) {
+    const canvas = document.getElementById("graphCanvas");
+    const ctx = canvas.getContext("2d");
+    
+    // Ajuste de resolución HD del Canvas
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    ctx.scale(2, 2);
+
+    const width = canvas.offsetWidth;
+    const height = canvas.offsetHeight;
+    const padding = 50;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Determinar rangos
+    const maxT = Math.max(...data.map(d => d.t), 36);
+    const maxQ = Math.max(...data.map(d => d.q), 1200) * 1.1;
+    const minQ = 0;
+
+    // Funciones de mapeo
+    const mapX = (t) => padding + (t / maxT) * (width - 2 * padding);
+    const mapY = (q) => height - padding - ((q - minQ) / (maxQ - minQ)) * (height - 2 * padding);
+
+    // Dibujar cuadrícula y ejes
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    
+    for (let q = 0; q <= maxQ; q += 400) {
+        const y = mapY(q);
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+        
+        ctx.fillStyle = "#64748b";
+        ctx.font = "11px sans-serif";
+        ctx.fillText(q, 10, y + 4);
+    }
+
+    for (let t = 0; t <= maxT; t += 6) {
+        const x = mapX(t);
+        ctx.beginPath();
+        ctx.moveTo(x, padding);
+        ctx.lineTo(x, height - padding);
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.font = "11px sans-serif";
+        ctx.fillText(t, x - 5, height - padding + 18);
+    }
+
+    // Dibujar Ejes
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.lineTo(width - padding, height - padding);
+    ctx.stroke();
+
+    // Títulos de ejes
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText("Caudal (m³/s)", padding - 40, padding - 15);
+    ctx.fillText("Tiempo transcurrido (horas)", width - 180, height - 10);
+
+    // Determinar índice límite según selección
+    const endIdx = (mode === "first") ? 1 : data.length - 1;
+
+    // Región Sombreada bajo la gráfica
+    ctx.fillStyle = "rgba(37, 99, 235, 0.45)";
+    ctx.beginPath();
+    ctx.moveTo(mapX(data[0].t), mapY(0));
+    for (let i = 0; i <= endIdx; i++) {
+        ctx.lineTo(mapX(data[i].t), mapY(data[i].q));
+    }
+    ctx.lineTo(mapX(data[endIdx].t), mapY(0));
+    ctx.closePath();
+    ctx.fill();
+
+    // Líneas de los segmentos
+    ctx.strokeStyle = "#1d4ed8";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let i = 0; i < data.length; i++) {
+        const x = mapX(data[i].t);
+        const y = mapY(data[i].q);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Dibujar Puntos
+    for (let i = 0; i < data.length; i++) {
+        const x = mapX(data[i].t);
+        const y = mapY(data[i].q);
+
+        ctx.fillStyle = (i <= endIdx) ? "#1e3a8a" : "#94a3b8";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Etiqueta de valor
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "10px sans-serif";
+        ctx.fillText(`(${data[i].t}h, ${data[i].q})`, x - 15, y - 10);
+    }
+}
+
+function calculateIntegral(data, mode) {
+    const mathDiv = document.getElementById("mathOutput");
+    let html = "";
+    
+    if (mode === "first") {
+        const Q0 = data[0].q;
+        const Q1 = data[1].q;
+        const t0 = data[0].t;
+        const t1 = data[1].t;
+        const dt = t1 - t0;
+        
+        const m = (Q1 - Q0) / dt;
+        const mFormatted = m.toFixed(4);
+        
+        // antiderivada F(t) = Q0*t + (m/2)*t^2
+        const areaHour = (Q0 * dt) + ((m / 2) * Math.pow(dt, 2));
+        const V1 = areaHour * 3600;
+
+        html += `<strong>--- CÁLCULO DEL PRIMER INTERVALO (t = ${t0} a t = ${t1} h) ---</strong><br><br>`;
+        html += `1. Valores iniciales:<br>`;
+        html += `   Q₀ = ${Q0} m³/s,  Q₁ = ${Q1} m³/s,  Δt = ${dt} horas<br><br>`;
+        html += `2. Pendiente de variación (m):<br>`;
+        html += `   m = (Q₁ - Q₀) / Δt = (${Q1} - ${Q0}) / ${dt} = <span class="highlight">${mFormatted} m³/s·h</span><br><br>`;
+        html += `3. Función del segmento recto f(t):<br>`;
+        html += `   f(t) = ${Q0} + ${mFormatted} · t,   para 0 ≤ t ≤ ${dt}<br><br>`;
+        html += `4. Planteamiento de la Integral Definida:<br>`;
+        html += `   V₁ = 3600 · ∫₀^{${dt}} (${Q0} + ${mFormatted}·t) dt<br><br>`;
+        html += `5. Antiderivada F(t):<br>`;
+        html += `   F(t) = ${Q0}·t + (${mFormatted}/2)·t² = ${Q0}·t + ${(m/2).toFixed(4)}·t²<br><br>`;
+        html += `6. Evaluación de límites y conversión a segundos (× 3600):<br>`;
+        html += `   F(${dt}) = ${Q0}(${dt}) + ${(m/2).toFixed(4)}(${dt}²) = <span class="highlight">${areaHour.toFixed(2)} (m³/s)·h</span><br>`;
+        html += `   V₁ = 3600 · ${areaHour.toFixed(2)} = <span class="result">${Math.round(V1).toLocaleString('es-CO')} m³</span><br><br>`;
+        html += `<em>Interpretación:</em> Representa el volumen total acumulado de agua que fluyó por la estación durante las primeras ${dt} horas.`;
+
+    } else {
+        let totalArea = 0;
+        html += `<strong>--- CÁLCULO DEL PERIODO COMPLETO (TODOS LOS SEGMENTOS) ---</strong><br><br>`;
+        
+        for (let i = 0; i < data.length - 1; i++) {
+            const Q0 = data[i].q;
+            const Q1 = data[i+1].q;
+            const dt = data[i+1].t - data[i].t;
+            const m = (Q1 - Q0) / dt;
+            const areaSeg = (Q0 * dt) + ((m / 2) * Math.pow(dt, 2));
+            const volSeg = areaSeg * 3600;
+            
+            totalArea += areaSeg;
+
+            html += `Segmento ${i+1} [t = ${data[i].t}h a ${data[i+1].t}h | Δt = ${dt}h]:<br>`;
+            html += `   f_${i+1}(t) = ${Q0} + (${m.toFixed(2)})·(t - ${data[i].t})<br>`;
+            html += `   Área = ${areaSeg.toFixed(2)} (m³/s)·h  =>  Volumen = ${Math.round(volSeg).toLocaleString('es-CO')} m³<br><br>`;
+        }
+
+        const totalVol = totalArea * 3600;
+        html += `--------------------------------------------------<br>`;
+        html += `<strong>Área Total bajo la curva:</strong> <span class="highlight">${totalArea.toFixed(2)} (m³/s)·h</span><br>`;
+        html += `<strong>VOLUMEN TOTAL ACUMULADO (36h):</strong> <span class="result">${Math.round(totalVol).toLocaleString('es-CO')} m³</span><br><br>`;
+        html += `<em>Interpretación:</em> Es la cantidad total de agua (en metros cúbicos) que pasó por la estación Anácaro durante las 36 horas del estudio.`;
+    }
+
+    mathDiv.innerHTML = html;
+}
+
+// Inicializar la simulación
+window.onload = updateSimulation;
+</script>
+
+</body>
+</html>
